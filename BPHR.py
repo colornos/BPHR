@@ -110,7 +110,7 @@ def init_ble_mode():
         return False
 
 config = ConfigParser()
-config.read('/home/pi/Start/BPHR/BPHRPlugin.ini')
+config.read('/home/pi/Start/BPHR/BPHR.ini')
 
 # Logging setup
 numeric_level = getattr(logging, config.get('Program', 'loglevel').upper(), None)
