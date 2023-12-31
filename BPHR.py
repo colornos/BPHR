@@ -14,11 +14,11 @@ import urllib.parse
 
 # Plugin Code
 class Plugin:
-    def __init__(self, config):
+    def __init__(self):
         self.config = config
         self.http = urllib3.PoolManager()
 
-    def execute(self, heartratedata):
+    def execute(self, config, heartratedata):
         log = logging.getLogger('BPHR')
         log.info('Starting plugin: BPHR')
         
@@ -138,7 +138,7 @@ if not init_ble_mode():
 adapter = pygatt.backends.GATTToolBackend()
 adapter.start()
 
-plugin = Plugin(config)
+plugin = Plugin()
 
 while True:
     # Wait for the device to be found
@@ -172,6 +172,6 @@ while True:
             log.info('Done receiving data from blood pressure monitor')
             if heartratedata:
                 heartratedatasorted = sorted(heartratedata, key=lambda k: k['timestamp'], reverse=True)
-                plugin.execute(heartratedatasorted)
+                plugin.execute(config, heartratedatasorted)
             else:
                 log.error('Unreliable data received. Unable to process')
