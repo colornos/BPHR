@@ -14,11 +14,11 @@ import urllib.parse
 
 # Plugin Code
 class Plugin:
-    def __init__(self):
+    def __init__(self, config):
         self.config = config
         self.http = urllib3.PoolManager()
 
-    def execute(self, config, heartratedata):
+    def execute(self, heartratedata):
         log = logging.getLogger('BPHR')
         log.info('Starting plugin: BPHR')
         
@@ -172,6 +172,6 @@ while True:
             log.info('Done receiving data from blood pressure monitor')
             if heartratedata:
                 heartratedatasorted = sorted(heartratedata, key=lambda k: k['timestamp'], reverse=True)
-                plugin.execute(config, heartratedatasorted)
+                plugin.execute(heartratedatasorted)
             else:
                 log.error('Unreliable data received. Unable to process')
