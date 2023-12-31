@@ -38,7 +38,7 @@ class Plugin:
             diastolic = heartratedata[0]['diastolic']
             pulse = heartratedata[0]['pulse']
             headers = {
-                'User-Agent': 'RaspberryPi/BW300.py',
+                'User-Agent': 'RaspberryPi/BPHR.py',
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
             form_data = {'rfid': rfid, 'one': systolic, 'two': diastolic, 'three': pulse}
@@ -110,7 +110,7 @@ def init_ble_mode():
         return False
 
 config = ConfigParser()
-config.read('/home/pi/Start/BW300/BW300.ini')
+config.read('/home/pi/Start/BPHR/BPHR.ini')
 
 # Logging setup
 numeric_level = getattr(logging, config.get('Program', 'loglevel').upper(), None)
@@ -135,7 +135,7 @@ else:
     addresstype = pygatt.BLEAddressType.random
     time_offset = 0
 
-log.info('BW300 Started')
+log.info('BPHR Started')
 if not init_ble_mode():
     sys.exit()
 
