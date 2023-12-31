@@ -172,5 +172,3 @@ while True:
             if heartratedata:
                 heartratedatasorted = sorted(heartratedata, key=lambda k: k['timestamp'], reverse=True)
                 plugin.execute(config, heartratedatasorted)
-            else:
-                log.error('Unreliable data received. Unable to process')
