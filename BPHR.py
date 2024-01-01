@@ -24,6 +24,9 @@ class Plugin:
         with open("/home/pi/Start/rfid.txt", "r") as f1:
             rfid = f1.read().strip()
 
+        with open("/home/pi/Start/pin.txt", "r") as f3:
+            pin = f3.read().strip()
+
         if not rfid:
             print("No card")
             with open("/home/pi/Start/plugin_response.txt", "w") as f2:
@@ -36,7 +39,7 @@ class Plugin:
                 'User-Agent': 'RaspberryPi/BPHR.py',
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
-            form_data = {'rfid': rfid, 'one': systolic, 'two': diastolic, 'three': pulse}
+            form_data = {'rfid': rfid, 'one': systolic, 'two': diastolic, 'three': pulse, 'pin': pin}
             encoded_data = urllib.parse.urlencode(form_data)
             r = self.http.request('POST', 'https://colornos.com/sensors/bp_hr.php', body=encoded_data, headers=headers)
             response = r.data.decode('utf-8')
