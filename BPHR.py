@@ -12,6 +12,9 @@ import threading
 import urllib3
 import urllib.parse
 
+# Global variables
+ERROR_RECOVERY_DELAY = 10  # seconds
+
 # Plugin Code
 class Plugin:
     def __init__(self):
@@ -109,14 +112,22 @@ def processIndication(handle, values):
     else:
         log.debug('Unhandled Indication encountered')
 
-def wait_for_device(devname):
+def wait_for_device(devname, timeout=60):
     found = False
-    while not found:
+    start_time = time.time()
+    while not found and (time.time() - start_time) < timeout:
         try:
             found = adapter.filtered_scan(devname)
-        except pygatt.exceptions.BLEError:
+            if found:
+                log.info(f"Device {devname} found.")
+            else:
+                log.debug(f"Device {devname} not found. Retrying...")
+            time.sleep(1)  # Sleep for 1 second before retrying
+        except pygatt.exceptions.BLEError as e:
+            log.error(f"BLE error encountered: {e}. Resetting adapter.")
             adapter.reset()
-    return
+            time.sleep(5)  # Sleep for a brief period after resetting
+    return found
 
 def connect_device(address):
     device_connected = False
@@ -174,6 +185,7 @@ adapter = pygatt.backends.GATTToolBackend()
 adapter.start()
 
 plugin = Plugin()
+CHECK_INTERVAL = 60  # seconds
 
 while True:
     try:
