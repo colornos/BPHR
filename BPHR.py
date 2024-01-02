@@ -126,7 +126,7 @@ def processIndication(handle, values):
     else:
         log.debug('Unhandled Indication encountered')
 
-def wait_for_device(devname, timeout=60):
+def wait_for_device(devname, timeout=15):
     found = False
     start_time = time.time()
     while not found and (time.time() - start_time) < timeout:
@@ -199,12 +199,12 @@ adapter = pygatt.backends.GATTToolBackend()
 adapter.start()
 
 plugin = Plugin()
-CHECK_INTERVAL = 60  # seconds
+CHECK_INTERVAL = 10  # seconds
 
 while True:
     try:
         # Check if the sensor is available
-        if wait_for_device(device_name, timeout=30):
+        if wait_for_device(device_name, timeout=15):
             # Attempt to connect to the sensor
             device = connect_device(ble_address)
             if device is not None:
