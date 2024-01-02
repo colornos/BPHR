@@ -3,6 +3,7 @@
 import sys
 import pygatt.backends
 import logging
+from logging.handlers import RotatingFileHandler
 from configparser import ConfigParser
 import time
 import subprocess
@@ -13,7 +14,7 @@ import urllib3
 import urllib.parse
 
 # Set up log rotation
-log_file = '/home/pi/Start/sensor_manager.log'  # Replace with your log file path
+log_file = '/home/pi/Start/sensor_manager.log'
 max_log_size = 10 * 1024 * 1024  # 10 MB
 backup_count = 3  # Keep three backup files
 
