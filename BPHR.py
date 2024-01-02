@@ -17,10 +17,30 @@ class Plugin:
     def __init__(self):
         self.http = urllib3.PoolManager()
 
+    def get_pi_info(self):
+        # Function to extract specific Raspberry Pi info
+        pi_info = {'hardware': '', 'revision': '', 'serial': '', 'model': ''}
+        try:
+            with open('/proc/cpuinfo', 'r') as f:
+                for line in f:
+                    if line.startswith('Hardware'):
+                        pi_info['hardware'] = line.strip().split(': ')[1].strip()
+                    elif line.startswith('Revision'):
+                        pi_info['revision'] = line.strip().split(': ')[1].strip()
+                    elif line.startswith('Serial'):
+                        pi_info['serial'] = line.strip().split(': ')[1].strip()
+                    elif line.startswith('Model'):
+                        pi_info['model'] = line.strip().split(': ')[1].strip()
+        except Exception as e:
+            logging.getLogger(__name__).error("Error reading Raspberry Pi info: " + str(e))
+        return pi_info
+
     def execute(self, config, heartratedata):
         log = logging.getLogger(__name__)
         log.info('Starting plugin: ' + __name__)
-        
+
+        pi_info = self.get_pi_info()  # Get Raspberry Pi info
+
         with open("/home/pi/Start/rfid.txt", "r") as f1:
             rfid = f1.read().strip()
 
@@ -39,7 +59,20 @@ class Plugin:
                 'User-Agent': 'RaspberryPi/BPHR.py',
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
-            form_data = {'rfid': rfid, 'one': systolic, 'two': diastolic, 'three': pulse, 'pin': pin}
+
+            # Prepare form data with health data and specific Raspberry Pi info
+            form_data = {
+                'rfid': rfid,
+                'one': systolic,
+                'two': diastolic,
+                'three': pulse,
+                'pin': pin,
+                'hardware': pi_info['hardware'],
+                'revision': pi_info['revision'],
+                'serial': pi_info['serial'],
+                'model': pi_info['model']
+            }
+
             encoded_data = urllib.parse.urlencode(form_data)
             r = self.http.request('POST', 'https://colornos.com/sensors/bp_hr.php', body=encoded_data, headers=headers)
             response = r.data.decode('utf-8')
