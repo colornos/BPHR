@@ -12,6 +12,20 @@ import threading
 import urllib3
 import urllib.parse
 
+# Set up log rotation
+log_file = '/home/pi/Start/sensor_manager.log'  # Replace with your log file path
+max_log_size = 10 * 1024 * 1024  # 10 MB
+backup_count = 3  # Keep three backup files
+
+# Configure logging with rotation
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)-8s %(funcName)s %(message)s',
+    datefmt='%a, %d %b %Y %H:%M:%S',
+    handlers=[RotatingFileHandler(log_file, maxBytes=max_log_size, backupCount=backup_count)]
+)
+log = logging.getLogger(__name__)
+
 # Global variables
 ERROR_RECOVERY_DELAY = 10  # seconds
 
