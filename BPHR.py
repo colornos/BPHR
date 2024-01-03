@@ -127,7 +127,7 @@ def processIndication(handle, values):
     else:
         log.debug('Unhandled Indication encountered')
 
-def wait_for_device(devname, timeout=15):
+def wait_for_device(devname, timeout=30):
     found = False
     start_time = time.time()
     while not found and (time.time() - start_time) < timeout:
@@ -200,14 +200,14 @@ adapter = pygatt.backends.GATTToolBackend()
 adapter.start()
 
 plugin = Plugin()
-CHECK_INTERVAL = 10  # seconds
-MAX_RETRY_COUNT = 3  # Maximum number of retries for connecting to the sensor
-RETRY_DELAY = 5  # Delay in seconds between retries
-ADAPTER_RESET_DELAY = 10  # Delay after resetting the BLE adapter
+CHECK_INTERVAL = 45  # seconds
+MAX_RETRY_COUNT = 10  # Maximum number of retries for connecting to the sensor
+RETRY_DELAY = 20  # Delay in seconds between retries
+ADAPTER_RESET_DELAY = 25  # Delay after resetting the BLE adapter
 
 while True:
     try:
-        if wait_for_device(device_name, timeout=15):
+        if wait_for_device(device_name, timeout=30):
             retry_count = 0
             while retry_count < MAX_RETRY_COUNT:
                 device = connect_device(ble_address)
