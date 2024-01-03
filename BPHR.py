@@ -201,8 +201,8 @@ adapter.start()
 
 plugin = Plugin()
 CHECK_INTERVAL = 60  # seconds
-MAX_RETRY_COUNT = 100  # Maximum number of retries for connecting to the sensor
-RETRY_DELAY = 60  # Delay in seconds between retries
+MAX_RETRY_COUNT = 10  # Maximum number of retries for connecting to the sensor
+RETRY_DELAY = 30  # Delay in seconds between retries
 ADAPTER_RESET_DELAY = 30  # Delay after resetting the BLE adapter
 
 while True:
