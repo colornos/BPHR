@@ -137,12 +137,17 @@ def connect_device(address):
     device_connected = False
     tries = 5
     device = None
+
     while not device_connected and tries > 0:
         try:
             device = adapter.connect(address, 8, addresstype)
             device_connected = True
-        except pygatt.exceptions.NotConnectedError:
+        except pygatt.exceptions.NotConnectedError as e:
+            log.error(f"Connection attempt failed: {e}")
             tries -= 1
+            # Optional: Add a delay here if needed
+            time.sleep(1)  # Delay between retries
+
     return device
 
 def init_ble_mode():
