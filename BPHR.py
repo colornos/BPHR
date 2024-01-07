@@ -18,7 +18,6 @@ class Plugin:
         self.http = urllib3.PoolManager()
 
     def get_pi_info(self):
-        # Function to extract specific Raspberry Pi info
         pi_info = {'hardware': '', 'revision': '', 'serial': '', 'model': ''}
         try:
             with open('/proc/cpuinfo', 'r') as f:
@@ -39,7 +38,7 @@ class Plugin:
         log = logging.getLogger(__name__)
         log.info('Starting plugin: ' + __name__)
 
-        pi_info = self.get_pi_info()  # Get Raspberry Pi info
+        pi_info = self.get_pi_info()
 
         with open("/home/pi/Start/rfid.txt", "r") as f1:
             rfid = f1.read().strip()
@@ -60,7 +59,6 @@ class Plugin:
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
 
-            # Prepare form data with health data and specific Raspberry Pi info
             form_data = {
                 'rfid': rfid,
                 'one': systolic,
@@ -109,29 +107,24 @@ def processIndication(handle, values):
     else:
         log.debug('Unhandled Indication encountered')
 
-def wait_for_device(devname, timeout=1800):
-    found = False
-    start_time = time.time()
+def continuous_scan(devname):
+    while True:
+        found = scan_for_device(devname)
+        if found:
+            log.info(f"{devname} found, proceeding with connection and data handling.")
+            break
+        time.sleep(10)  # Adjust as needed for efficient scanning
 
-    while not found and (time.time() - start_time) < timeout:
-        try:
-            found_devices = adapter.scan(timeout=5)  # Reduced scan time for quicker response
-            for device in found_devices:
-                if device['name'] == devname:
-                    found = True
-                    log.info(f"{devname} found.")
-                    break
-            if not found:
-                log.debug(f"{devname} not found, retrying...")
-            time.sleep(1)  # Brief sleep before retrying
-        except pygatt.exceptions.BLEError as e:
-            log.error(f"BLE error encountered: {e}. Resetting adapter.")
-            adapter.reset()
-            time.sleep(1)  # Reduced sleep after resetting
-
-    if not found:
-        log.warning(f"Timeout reached. {devname} not found.")
-    return found
+def scan_for_device(devname):
+    try:
+        found_devices = adapter.scan(timeout=5)
+        for device in found_devices:
+            if device['name'] == devname:
+                return True
+    except pygatt.exceptions.BLEError as e:
+        log.error(f"BLE error encountered: {e}")
+        adapter.reset()
+    return False
 
 def connect_device(address):
     device_connected = False
@@ -145,7 +138,6 @@ def connect_device(address):
         except pygatt.exceptions.NotConnectedError as e:
             log.error(f"Connection attempt failed: {e}")
             tries -= 1
-            # Optional: Add a delay here if needed
             time.sleep(1)  # Delay between retries
 
     return device
@@ -196,34 +188,28 @@ adapter.start()
 plugin = Plugin()
 
 while True:
-    # Wait for the device to be found
-    wait_for_device(device_name)
-    device = connect_device(ble_address)
+    continuous_scan(device_name)
 
-    # If device is connected
+    device = connect_device(ble_address)
     if device:
         heartratedata = []
         handle_heartrate = device.get_handle(Char_heartrate)
         continue_comms = True
 
-        # Subscribe to the heartrate characteristic
         try:
             device.subscribe(Char_heartrate, callback=processIndication, indication=True)
         except pygatt.exceptions.NotConnectedError:
             continue_comms = False
 
-        # If subscription is successful, wait for data
         if continue_comms:
             log.info('Waiting for notifications for another 30 seconds')
             time.sleep(30)
 
-            # Disconnect the device after receiving data
             try:
                 device.disconnect()
             except pygatt.exceptions.NotConnectedError:
                 log.info('Could not disconnect...')
 
-            # Log and process the data received
             log.info('Done receiving data from blood pressure monitor')
             if heartratedata:
                 heartratedatasorted = sorted(heartratedata, key=lambda k: k['timestamp'], reverse=True)
